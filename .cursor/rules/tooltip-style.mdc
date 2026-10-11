@@ -1,0 +1,15 @@
+---
+description: Match vanilla Bannerlord tooltip phrasing when adding or editing perk/skill text
+alwaysApply: true
+---
+
+# Tooltip style (match vanilla)
+
+When adding or rewriting perk/skill tooltip lines in PerkFixesAndRebalance:
+
+1. **Match neighbors** — Copy role labels, punctuation, colon placement, and value position from adjacent vanilla (or already-clarified) lines. Do not invent a new sentence shape next to `Role: Description: ±N%` lines.
+2. **One effect per line** — Split combined dealt/taken (or similar) into separate bullets when vanilla would.
+3. **Order** — Insert new lines next to the related original (same role / same topic), not dumped at the end.
+4. **Exact values** — Show the real scaled number; do not round away significant digits (e.g. `0.18` must not become `0.2`). Prefer formats like `0.##` when vanilla `0.0` would mislead.
+5. **No redundant role notes** — If the header already says Army Commander / Party Leader / etc., do not add “needs the army leader to have this perk” (or similar).
+6. **Epic thresholds** — Use the real gate from code/models (`MinSkillRequiredForEpicPerkBonus` = 200 for Tactical Mastery; `MaxSkillRequiredForEpicPerkBonus` = 250 for Minister of Health). Do not hardcode the wrong epic floor from another perk.
