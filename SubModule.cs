@@ -16,7 +16,6 @@ namespace PerkFixesAndRebalance
 
             // Pass assembly explicitly: parameterless PatchAll() can NRE under BLSE.
             new Harmony(HarmonyId).PatchAll(typeof(SubModule).Assembly);
-            DoctorsOathXpLog.Line("loaded rbmAtLoad=" + DoctorsOathRbmSkillPatch.OverridesSurvival);
         }
 
         protected override void OnGameStart(Game game, IGameStarter gameStarterObject)
