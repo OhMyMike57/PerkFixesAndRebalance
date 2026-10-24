@@ -1,0 +1,26 @@
+---
+description: Bannerlord mod workflow for PerkFixesAndRebalance: deploy, commit, release hygiene
+alwaysApply: true
+---
+
+# PerkFixesAndRebalance workflow
+
+Details: personal skills `bannerlord-deploy-watcher` (build/deploy) and
+`bannerlord-release` (version bump, zip). This rule is the always-on summary.
+
+- **Module:** `PerkFixesAndRebalance`, deployed to
+  `D:\SteamLibrary\steamapps\common\Mount & Blade II Bannerlord\Modules\PerkFixesAndRebalance`.
+- **Deploy** every finished change that builds. Build with `-p:SkipBannerlordDeploy=true`,
+  copy `SubModule.xml` and the DLL/PDB into the module folder, and if the DLL is locked
+  run `"D:\Games\Bannerlord\Mod-dev\PerkFixesAndRebalance\tools\deploy-watcher.ps1" -Once`
+  in the agent Shell (`block_until_ms: 0`, `notify_on_output` `DEPLOYED|UP TO DATE|FAILED|MISMATCH`).
+- If Auto-review blocks a build, copy, or watcher call, retry that same call with
+  approval. Do not drop the deploy.
+- Never `Start-Process` a watcher, and never poll or `AwaitShell` for it. End the
+  turn after starting it. Confirm in chat after any deploy.
+- **Commit after every finished change** that builds. Stage only the files you
+  changed (`git add <paths>`, `git commit -- <paths>`); the tree can hold other
+  uncommitted work. No push or amend unless asked.
+- **Version bumps and release zips only when asked.** `dist/` stays gitignored.
+  Remove debug logging and stray log files (repo and module folder) before zipping.
+- Work only in this repo. Never run or edit another mod's watcher or files.
