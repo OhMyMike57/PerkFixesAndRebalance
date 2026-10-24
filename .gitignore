@@ -8,5 +8,6 @@ obj/
 *.dll
 *.pdb
 *.cache
+dist/
 .DS_Store
 Thumbs.db

@@ -6,6 +6,7 @@
     <RootNamespace>PerkFixesAndRebalance</RootNamespace>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

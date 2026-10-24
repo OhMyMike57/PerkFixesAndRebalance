@@ -5,6 +5,7 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using Helpers;
 using SandBox.GameComponents;
+using SandBox.Missions.MissionLogics;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.CharacterDevelopment;
 using TaleWorlds.CampaignSystem.GameComponents;
@@ -141,45 +142,200 @@ namespace PerkFixesAndRebalance
     }
 
     /// <summary>
-    /// Auto-resolve awards Doctor's Oath surgery Medicine XP from MapEventSide on each regular enemy casualty.
-    /// Fought battles never did that; RBM also drops vanilla's GetSurvivalChance XP side-effect. Grant the same
-    /// MapEventSide payout after the kill/unconscious roll (wound = success, death = failure).
+    /// Fought battles award Doctor's Oath surgery XP inside GetSurvivalChance, called from
+    /// SandboxAgentDecideKilledOrUnconsciousModel when a troop is downed. RBM's prefix replaces that
+    /// method and drops OnSurgeryApplied. Earlier hit and removal hooks never saw the striker: the blow
+    /// is not fatal yet, and siege OnAgentRemoved often has a null affector. This model method is the
+    /// one that runs for every downed troop. Mounted killers are resolved here; the model itself only
+    /// passes a party when the affector is already human, so cavalry downs never reached GetSurvivalChance's XP.
     /// </summary>
-    [HarmonyPatch(typeof(Mission), "GetAgentState")]
+    [HarmonyPatch(typeof(SandboxAgentDecideKilledOrUnconsciousModel), nameof(SandboxAgentDecideKilledOrUnconsciousModel.GetAgentStateProbability))]
     internal static class DoctorsOathCombatSurgeryXpPatch
     {
-        private static void Postfix(Agent affectorAgent, Agent agent, AgentState __result)
+        private static int _rolls;
+
+        internal static void ResetLogCount() => _rolls = 0;
+
+        private static void Postfix(Agent affectorAgent, Agent effectedAgent)
         {
-            if (Campaign.Current == null
-                || (__result != AgentState.Killed && __result != AgentState.Unconscious)
-                || agent == null || !agent.IsHuman
-                || affectorAgent == null || !affectorAgent.IsHuman
-                || affectorAgent.Team == null || agent.Team == null
-                || affectorAgent.Team == agent.Team)
+            _rolls++;
+            string skip = SkipReason(affectorAgent, effectedAgent, out MobileParty party, out CharacterObject troop);
+            if (skip != null)
             {
+                if (_rolls <= 40 || _rolls % 100 == 0)
+                {
+                    DoctorsOathXpLog.Line("ROLL " + _rolls + " skip=" + skip
+                        + " victim=" + Name(effectedAgent)
+                        + " affector=" + Name(affectorAgent));
+                }
+
                 return;
             }
 
-            if (!(agent.Character is CharacterObject victim) || victim.IsHero)
+            DoctorsOathXpLog.Line("ROLL " + _rolls + " AWARD tier=" + troop.Tier
+                + " xp=" + (5 * troop.Tier)
+                + " party=" + party.Name
+                + " surgeon=" + (party.EffectiveSurgeon?.Name?.ToString() ?? "null")
+                + " victim=" + troop.Name);
+            // Vanilla awards 5 × tier here, before it knows killed vs wounded.
+            SkillLevelingManager.OnSurgeryApplied(party, surgerySuccess: false, troop.Tier);
+        }
+
+        private static string SkipReason(Agent affector, Agent victim, out MobileParty party, out CharacterObject troop)
+        {
+            party = null;
+            troop = null;
+            if (!DoctorsOathRbmSkillPatch.RbmActive())
             {
-                return;
+                return "rbm-type-not-found";
             }
 
-            if (!(affectorAgent.Origin?.BattleCombatant is PartyBase strikerParty) || !strikerParty.IsMobile
-                || strikerParty.MobileParty == null
-                || !strikerParty.MobileParty.HasPerk(DefaultPerks.Medicine.DoctorsOath))
+            if (Campaign.Current == null)
             {
-                return;
+                return "no-campaign";
             }
 
-            MobileParty striker = strikerParty.MobileParty;
+            if (victim == null || !victim.IsHuman)
+            {
+                return "victim-not-human";
+            }
 
-            bool surgerySuccess = __result == AgentState.Unconscious;
-            SkillLevelingManager.OnSurgeryApplied(striker, surgerySuccess, victim.Tier);
+            if (!(victim.Character is CharacterObject character))
+            {
+                return "victim-not-character";
+            }
+
+            if (character.IsHero)
+            {
+                return "victim-hero";
+            }
+
+            troop = character;
+            Agent killer = affector;
+            if (killer != null && !killer.IsHuman)
+            {
+                killer = killer.RiderAgent;
+            }
+
+            if (killer == null)
+            {
+                return "no-killer";
+            }
+
+            if (!killer.IsHuman)
+            {
+                return "killer-not-human";
+            }
+
+            if (killer.Team == null || victim.Team == null)
+            {
+                return "no-team";
+            }
+
+            if (killer.Team.Side == victim.Team.Side)
+            {
+                return "same-side";
+            }
+
+            if (!(killer.Origin?.BattleCombatant is PartyBase partyBase))
+            {
+                return "killer-origin=" + (killer.Origin?.GetType().Name ?? "null");
+            }
+
+            if (!partyBase.IsMobile || partyBase.MobileParty == null)
+            {
+                return "killer-party-not-mobile";
+            }
+
+            party = partyBase.MobileParty;
+            if (!party.HasPerk(DefaultPerks.Medicine.DoctorsOath))
+            {
+                return "no-perk party=" + party.Name + " surgeon=" + (party.EffectiveSurgeon?.Name?.ToString() ?? "null");
+            }
+
+            troop = character;
+            return null;
+        }
+
+        private static string Name(Agent agent)
+        {
+            if (agent == null)
+            {
+                return "null";
+            }
+
+            return (agent.IsHuman ? "human " : "nonhuman ") + (agent.Character?.Name?.ToString() ?? agent.Name);
         }
     }
 
-    /// <summary>RBM replaces GetSurvivalChance; its Doctor's Oath bonus is the SkillHelper call after the perk check.</summary>
+    [HarmonyPatch(typeof(BattleAgentLogic), "AfterStart")]
+    internal static class DoctorsOathXpLogBattlePatch
+    {
+        private static void Postfix() => DoctorsOathXpLog.BattleStart();
+    }
+
+    /// <summary>Sees removals even when the killed-or-wounded roll never runs. Does not award XP.</summary>
+    [HarmonyPatch(typeof(BattleAgentLogic), nameof(BattleAgentLogic.OnAgentRemoved))]
+    internal static class DoctorsOathXpLogRemovalPatch
+    {
+        private static int _removed;
+
+        internal static void ResetLogCount() => _removed = 0;
+
+        private static void Postfix(Agent affectedAgent, Agent affectorAgent, AgentState agentState)
+        {
+            if (affectedAgent == null || !affectedAgent.IsHuman
+                || (agentState != AgentState.Killed && agentState != AgentState.Unconscious))
+            {
+                return;
+            }
+
+            _removed++;
+            if (_removed > 40 && _removed % 100 != 0)
+            {
+                return;
+            }
+
+            Agent killer = affectorAgent;
+            if (killer != null && !killer.IsHuman)
+            {
+                killer = killer.RiderAgent;
+            }
+
+            string party = "none";
+            if (killer?.Origin?.BattleCombatant is PartyBase partyBase && partyBase.IsMobile)
+            {
+                party = partyBase.MobileParty?.Name?.ToString() ?? "mobile-null";
+            }
+
+            DoctorsOathXpLog.Line("REMOVED " + _removed + " " + agentState
+                + " victim=" + (affectedAgent.Character?.Name?.ToString() ?? "?")
+                + " affector=" + (affectorAgent == null ? "null" : affectorAgent.IsHuman ? "human" : "mount")
+                + " killerParty=" + party);
+        }
+    }
+
+    [HarmonyPatch(typeof(DefaultSkillLevelingManager), nameof(DefaultSkillLevelingManager.OnSurgeryApplied))]
+    internal static class DoctorsOathXpLogSurgeryPatch
+    {
+        private static void Postfix(MobileParty party, bool surgerySuccess, int troopTier)
+        {
+            Hero surgeon = party?.EffectiveSurgeon;
+            float rate = surgeon?.HeroDeveloper?.GetFocusFactor(DefaultSkills.Medicine) ?? -1f;
+            DoctorsOathXpLog.Line("SURGERY party=" + (party?.Name?.ToString() ?? "null")
+                + " success=" + surgerySuccess
+                + " tier=" + troopTier
+                + " rawXp=" + (surgerySuccess ? 10 * troopTier : 5 * troopTier)
+                + " surgeon=" + (surgeon?.Name?.ToString() ?? "null")
+                + " learningRate=" + rate.ToString("0.###"));
+        }
+    }
+
+    /// <summary>
+    /// RBM replaces GetSurvivalChance and keeps the Doctor's Oath survival bonus but drops OnSurgeryApplied.
+    /// Fought battles are paid from <see cref="DoctorsOathCombatSurgeryXpPatch"/>. Auto-resolve never calls that
+    /// model, so restore the side-effect here only while no mission is running.
+    /// </summary>
     [HarmonyPatch]
     internal static class DoctorsOathRbmSkillPatch
     {
@@ -192,7 +348,24 @@ namespace PerkFixesAndRebalance
             }
         }
 
-        private static bool Prepare() => Target != null;
+        private static bool Prepare()
+        {
+            OverridesSurvival = Target != null;
+            return OverridesSurvival;
+        }
+
+        internal static bool OverridesSurvival { get; private set; }
+
+        /// <summary>Prepare runs at mod load, before RBM may be loaded. Recheck when a troop actually goes down.</summary>
+        internal static bool RbmActive()
+        {
+            if (!OverridesSurvival)
+            {
+                OverridesSurvival = Target != null;
+            }
+
+            return OverridesSurvival;
+        }
 
         private static MethodBase TargetMethod() => Target;
 
@@ -229,6 +402,19 @@ namespace PerkFixesAndRebalance
             }
 
             explainedNumber.Add(effect.GetSkillEffectValue(medicine), DoctorsOath.RoleText(ref explainedNumber));
+        }
+
+        private static void Postfix(CharacterObject character, PartyBase enemyParty)
+        {
+            // Fought battles pay from GetAgentStateProbability. This covers auto-resolve, where that model is not used.
+            if (Mission.Current != null || character == null
+                || enemyParty?.MobileParty == null
+                || !enemyParty.MobileParty.HasPerk(DefaultPerks.Medicine.DoctorsOath))
+            {
+                return;
+            }
+
+            SkillLevelingManager.OnSurgeryApplied(enemyParty.MobileParty, surgerySuccess: false, character.Tier);
         }
     }
 

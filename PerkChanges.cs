@@ -34,6 +34,7 @@ namespace PerkFixesAndRebalance
         public static bool StrongGripAllTroops { get; private set; }
         public static bool CleanThrustAllTroops { get; private set; }
         public static bool CounterweightAllTroops { get; private set; }
+        public static bool FlexibleFighterCavalry { get; private set; }
         public static bool LeaderOrRoleHero { get; private set; }
         public static bool TacticsBattleEffects { get; private set; }
         public static bool TacticalMasteryPartyLeader { get; private set; }
@@ -92,6 +93,15 @@ namespace PerkFixesAndRebalance
             StrongGripAllTroops = s.StrongGripAllTroops;
             CleanThrustAllTroops = s.CleanThrustAllTroops;
             CounterweightAllTroops = s.CounterweightAllTroops;
+            FlexibleFighterCavalry = s.FlexibleFighterCavalry;
+            if (FlexibleFighterCavalry)
+            {
+                EditCaptain(perks, "_throwingFlexibleFighter", "{=PFx_FlexibleFighterCav}{VALUE} Bow, Crossbow and Throwing skill to infantry and cavalry, and {VALUE} One Handed, Two Handed and Polearm skill to archers and horse archers in your formation.");
+            }
+            else if (clarify)
+            {
+                EditCaptain(perks, "_throwingFlexibleFighter", "{=PFx_FlexibleFighter}{VALUE} Bow, Crossbow and Throwing skill to infantry, and {VALUE} One Handed, Two Handed and Polearm skill to archers and horse archers in your formation.");
+            }
             const string noHorse = " skill to infantry and archers in your formation.";
             if (WrappedHandlesAllTroops)
                 EditCaptain(perks, "_oneHandedWrappedHandles", "{=PFx_WrappedHandlesAll}{VALUE} One Handed skill to troops in your formation.");
@@ -175,6 +185,10 @@ namespace PerkFixesAndRebalance
             if (clarify)
             {
                 ApplyVanillaRoleLabelFixes(perks);
+                Edit(perks, "_rogueryWhiteLies",
+                    secondaryDescription: "{=PFx_WhiteLiesGov}{VALUE}% chance per day for +1 relation with a random notable in the governed settlement.");
+                Edit(perks, "_rogueryScarface",
+                    secondaryDescription: "{=PFx_ScarfaceGov}{VALUE}% chance per day for +1 relation with a random gang leader in the governed settlement.");
             }
 
             RestrictedPickedShots = s.PickedShotsCrossbowOnly
@@ -196,6 +210,14 @@ namespace PerkFixesAndRebalance
             Edit(perks, "_leadershipWePledgeOurSwords", primaryRole: PartyRole.ClanLeader);
             // Disorganized-morale check uses LeaderHero, not any party member.
             Edit(perks, "_tacticsImproviser", primaryRole: PartyRole.PartyLeader);
+
+            // Battle/siege rewards and party trade: Personal label, but code reads the party leader.
+            Edit(perks, "_charmWarlord", primaryRole: PartyRole.PartyLeader);
+            Edit(perks, "_leadershipFamousCommander",
+                primaryRole: PartyRole.PartyLeader, secondaryRole: PartyRole.PartyLeader);
+            Edit(perks, "_tacticsBesieged", secondaryRole: PartyRole.PartyLeader);
+            Edit(perks, "_tradeGranaryAccountant", primaryRole: PartyRole.PartyLeader);
+            Edit(perks, "_tradeTradeyardForeman", primaryRole: PartyRole.PartyLeader);
         }
 
         public static void ApplyNaval(object perks)
@@ -532,7 +554,6 @@ namespace PerkFixesAndRebalance
             ("_crossbowSheriff", "{=PFx_Sheriff}{VALUE}% crossbow damage against troops on foot by troops in your formation."),
             ("_crossbowCounterFire", "{=PFx_CounterFire}{VALUE}% damage taken from projectiles by troops in your formation wielding a crossbow."),
             ("_crossbowHammerBolts", "{=PFx_HammerBolts}{VALUE}% damage with crossbows by troops in your formation. Doesn't apply to shields."),
-            ("_throwingFlexibleFighter", "{=PFx_FlexibleFighter}{VALUE} Bow, Crossbow and Throwing skill to infantry, and {VALUE} One Handed, Two Handed and Polearm skill to archers and horse archers in your formation."),
             ("_throwingKnockOff", "{=PFx_KnockOff}{VALUE}% throwing damage against mounted troops and their mounts by troops in your formation."),
             ("_ridingNimbleSteed", "{=PFx_NimbleSteed}{VALUE} Riding skill to cavalry and horse archers in your formation."),
             ("_ridingHorseArcher", "{=PFx_HorseArcher}{VALUE}% ranged damage by mounted troops in your formation."),
@@ -573,8 +594,9 @@ namespace PerkFixesAndRebalance
             SetCaptainMask(perks, "_ridingHorseArcher", TroopUsageFlags.Mounted | TroopUsageFlags.Ranged);
             // Sprint is IsInfantry only. Foot+Melee matches Infantry formations and excludes archers (Foot alone would include them).
             SetCaptainMask(perks, "_athleticsSprint", TroopUsageFlags.OnFoot | TroopUsageFlags.Melee);
-            // Flexible Fighter: infantry get control skills, ranged (incl. HA) get vigor skills; pure cavalry get nothing.
-            // No single mask is Infantry|Archer|HA. Foot = Inf+Archer; Any also scores melee cavalry who get nothing.
+            // Flexible Fighter: infantry, and cavalry when that option is on, get control skills. Ranged (incl. HA)
+            // get vigor skills. Foot = Inf+Archer. Any also scores HA. Cavalry formations are added in
+            // FlexibleFighterCavalryScorePatch when the skill option is on and this mask is still Foot.
             SetCaptainMask(perks, "_throwingFlexibleFighter",
                 s.FlexibleFighterScoreHorseArchers ? TroopUsageFlags.None : TroopUsageFlags.OnFoot);
 

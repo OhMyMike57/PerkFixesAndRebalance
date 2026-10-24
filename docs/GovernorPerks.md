@@ -115,8 +115,8 @@ A governor effect applies to the town or castle the hero governs, and to village
 |---:|---|---|---|---|
 | 25 | **Sweet Talker** | -20% prisoner escape chance in the governed settlement. | No Rest for the Wicked | Party leader: +20% chance for convincing bandits to leave in peace with barter. |
 | 75 | **Know-How** | +1 security per day in the governed settlement. | In Best Light | Party leader: +5% more loot from defeated villagers and caravans. |
-| 125 | **White Lies** | +2% chance to get 1 relation per day with a random notable in the governed settlement. | Scarface | Personal: +20% crime rating decrease rate. |
-| 125 | **Scarface** | +5% chance per day to increase relation with a notable by 1 in the governed settlement. | White Lies | Personal: +30% chance for bandits, villagers and caravans to surrender. |
+| 125 | **White Lies** | 2% chance per day for +1 relation with a random notable in the governed settlement. | Scarface | Personal: +20% crime rating decrease rate. |
+| 125 | **Scarface** | 5% chance per day for +1 relation with a random gang leader in the governed settlement. | White Lies | Personal: +30% chance for bandits, villagers and caravans to surrender. |
 | 175 | **Salt the Earth** | +5% tariff revenue in the governed settlement. | One of the Family | Party leader: +20% more loot when villagers comply to your hostile actions. |
 | 175 | **One of the Family** | +1 recruitment slot when recruiting from gang leaders. | Salt the Earth | Party leader: +10 bonus Vigor and Control skills to bandit units in your party |
 | 225 | **Dirty Fighting** | +2 random food item will be smuggled to the besieged governed settlement. | Arms Dealer | Personal: +50% stun duration for kicking. |
@@ -153,8 +153,8 @@ A governor effect applies to the town or castle the hero governs, and to village
 | 100 | **Traveling Rumors** | +20 gold for each villager party visiting the governed settlement. | Toll Gates | Personal: Your caravans gather trade rumors. |
 | 150 | **Content Trades** | +10% tariff income in the governed settlement. | Mercenary Connections | Party leader: -50% wages paid while waiting in settlements. |
 | 150 | **Mercenary Connections** | +25% workshop production rate. | Content Trades | Party leader: -25% mercenary troop wages in your party. |
-| 200 | **Tradeyard Foreman** | +20% production rate to clay, iron, silk and silver in villages bound to the governed settlement. | Granary Accountant | Personal: -20% price penalty while selling pottery, tools, silk and jewelry. |
-| 200 | **Granary Accountant** | +20% production rate to grain, olives, fish, date in villages bound to the governed settlement. | Tradeyard Foreman | Personal: -20% price penalty while selling food items. |
+| 200 | **Tradeyard Foreman** | +20% production rate to clay, iron, silk and silver in villages bound to the governed settlement. | Granary Accountant | Party leader: -20% price penalty while selling pottery, tools, silk and jewelry. |
+| 200 | **Granary Accountant** | +20% production rate to grain, olives, fish, date in villages bound to the governed settlement. | Tradeyard Foreman | Party leader: -20% price penalty while selling food items. |
 | 225 | **Self-made Man** | +30% build speed for marketplace, kiln and aqueduct projects. | Sword For Barter | Personal: -50% barter penalty for items. |
 | 250 | **Spring of Gold** | +20% effect from boosting projects in the governed settlement. | Silver Tongue | Clan leader: +0.1% denars of interest income per day based on your current denars up to 1000 denars. |
 | 275 | **Trickle Down** | +2 daily prosperity while building a project in the governed settlement. | Man of Means | Party leader: +1 relationship with merchants if 10.000 or more denars are spent on a single deal. |

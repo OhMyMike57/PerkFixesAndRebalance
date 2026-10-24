@@ -100,7 +100,7 @@ A captain effect applies to the troops in the formation that hero leads in a bat
 |---:|---|---|---|---|---|
 | 25 | **Shield Breaker** | +8% damage to shields with throwing weapons by troops in your formation. | Throwing | Quick Draw | Personal: +40% damage to shields with throwing weapons. |
 | 25 | **Quick Draw** | +10% draw speed with throwing weapons to troops in your formation. | Throwing | Shield Breaker | Personal: +20% draw speed with throwing weapons. |
-| 50 | **Flexible Fighter** | +15 Bow, Crossbow and Throwing skill to infantry, and +15 One Handed, Two Handed and Polearm skill to archers and horse archers in your formation.<br>**Note:** By troop class: infantry get Bow/Crossbow/Throwing skill; archers and horse archers get One/Two Handed and Polearm. Cavalry (including mounted troops with javelins but no bow/crossbow) get nothing. Vanilla tags Foot; optional MCM can set Any so horse-archer formations also score it. | Foot | Hunter | Personal: +10% damage while using throwing weapons as melee. |
+| 50 | **Flexible Fighter** | +15 Bow, Crossbow and Throwing skill to infantry and cavalry, and +15 One Handed, Two Handed and Polearm skill to archers and horse archers in your formation.<br>**Note:** By troop class: infantry and cavalry get Bow/Crossbow/Throwing skill; archers and horse archers get One/Two Handed and Polearm. Turn off **cavalry get Bow, Crossbow and Throwing** for vanilla, where cavalry get nothing. Vanilla tags Foot; default MCM uses Any so horse-archer formations also score it. Cavalry formations still score when that horse-archer option is off. | Any (default) / Foot | Hunter | Personal: +10% damage while using throwing weapons as melee. |
 | 50 | **Hunter** | +8% damage to mounts with throwing weapons by troops in your formation. | Throwing + Land | Flexible Fighter | Personal: +40% damage to mounts with throwing weapons. |
 | 75 | **Mounted Skirmisher** | +10% damage with throwing weapons by mounted troops in your formation. | Mounted + Throwing | Well Prepared | Personal: -20% accuracy penalty with throwing weapons while mounted. |
 | 100 | **Knock Off** | +5% throwing damage against mounted troops and their mounts by troops in your formation. | Throwing + Land | Running Throw | Personal: Thrown weapons can now dismount and ignore 25% dismount resistance on attacks against cavalry. |
@@ -360,6 +360,7 @@ Mounted, melee weapons, cavalry class.
 | Lancer | Polearm 125 | +30% damage bonus from speed, polearms. |
 | Phalanx | Polearm 175 | +3% damage, polearms. |
 | Unstoppable Force | Polearm 225 | +30% damage bonus from speed, polearms. |
+| Flexible Fighter | Throwing 50 | +15 Bow, Crossbow and Throwing skill. |
 | Nimble Steed | Riding 25 | +30 Riding skill. |
 | Full Speed | Riding 25 | +10% horse charge damage. |
 | Nomadic Traditions | Riding 75 | +10% damage bonus from speed, melee. |
@@ -375,7 +376,7 @@ Mounted, melee weapons, cavalry class.
 
 #### Dismounted cavalry
 
-Perks they get only once on foot. They lose the mounted rows above except Nimble Steed, which stays but does nothing. They never get Sprint or Flexible Fighter (troop class).
+Perks they get only once on foot. They lose the mounted rows above except Nimble Steed, which stays but does nothing. They never get Sprint. They keep Flexible Fighter (+15 Bow, Crossbow and Throwing), because that half follows cavalry class, not whether they are currently mounted.
 
 | Perk | Skill | Effect |
 |---|---|---|

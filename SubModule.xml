@@ -2,7 +2,7 @@
 <Module>
   <Id value="PerkFixesAndRebalance" />
   <Name value="Perk Fixes and Rebalance" />
-  <Version value="v1.0.0" />
+  <Version value="v1.0.1" />
   <DefaultModule value="false" />
   <ModuleCategory value="Singleplayer" />
   <ModuleType value="Community" />

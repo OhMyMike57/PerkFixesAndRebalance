@@ -104,9 +104,14 @@ namespace PerkFixesAndRebalance
         public bool CounterweightAllTroops { get; set; } = true;
 
         [SettingPropertyBool("Flexible Fighter (Throwing, 50): also score for horse archers", Order = 4, RequireRestart = false,
-            HintText = "Order-of-battle only. Vanilla tags Foot (infantry and archers). Horse archers get the melee-skill half of the captain bonus but do not score. When on, the tag is Any so horse-archer formations score it too; melee cavalry also score though they get nothing from the perk. Does not change who receives the bonus in battle." + LoadNote)]
+            HintText = "Order-of-battle only. Vanilla tags Foot (infantry and archers). Horse archers get the melee-skill half of the captain bonus but do not score. When on, the tag is Any so horse-archer formations score it too. Does not change who receives the bonus in battle." + LoadNote)]
         [SettingPropertyGroup(SkillBonuses)]
-        public bool FlexibleFighterScoreHorseArchers { get; set; }
+        public bool FlexibleFighterScoreHorseArchers { get; set; } = true;
+
+        [SettingPropertyBool("Flexible Fighter (Throwing, 50): cavalry get Bow, Crossbow and Throwing", Order = 5, RequireRestart = false,
+            HintText = "Cavalry get the same captain skill bonus as infantry. Archers and horse archers still get One Handed, Two Handed and Polearm only. Turn off for vanilla, where cavalry get nothing from this perk." + LoadNote)]
+        [SettingPropertyGroup(SkillBonuses)]
+        public bool FlexibleFighterCavalry { get; set; } = true;
 
         [SettingPropertyBool("Picked Shots (250): crossbow troops only", Order = 0, RequireRestart = false,
             HintText = "The -50% wage for tier 4+ ranged troops and the +5 HP for ranged troops only apply to troops that carry a crossbow." + LoadNote)]

@@ -49,6 +49,42 @@ namespace PerkFixesAndRebalance
             MethodInfo open = AccessTools.Method(typeof(Mission), "GetMissionBehavior", Type.EmptyTypes);
             return open?.MakeGenericMethod(type).Invoke(Mission.Current, null);
         }
+
+        /// <summary>
+        /// PartyBase.FlagShip is Ships.MaxBy and throws when the party has no ships (every land-only party).
+        /// </summary>
+        internal static Ship FlagShipOrNull(PartyBase party)
+        {
+            return party?.Ships != null && party.Ships.Count > 0 ? party.FlagShip : null;
+        }
+
+        internal static bool AgentOnShip(Agent agent, Ship ship, bool bypassSteppedShipCheck)
+        {
+            object logic = MissionBehavior("NavalDLC.Missions.MissionLogics.NavalShipsLogic");
+            if (logic == null || ship == null)
+            {
+                return false;
+            }
+
+            object allShips = Traverse.Create(logic).Property("AllShips").GetValue();
+            if (!(allShips is System.Collections.IEnumerable ships))
+            {
+                return false;
+            }
+
+            foreach (object missionShip in ships)
+            {
+                object origin = Traverse.Create(missionShip).Property("ShipOrigin").GetValue();
+                if (!ReferenceEquals(origin, ship))
+                {
+                    continue;
+                }
+
+                return Traverse.Create(missionShip).Method("GetIsAgentOnShip", agent, bypassSteppedShipCheck).GetValue<bool>();
+            }
+
+            return false;
+        }
     }
 
     /// <summary>
@@ -237,47 +273,26 @@ namespace PerkFixesAndRebalance
                 return;
             }
 
-            Ship flagShip = party.FlagShip;
+            // Vanilla returns before figureheads when there is no NavalShipsLogic (land battles).
+            if (ArmyCommander.MissionBehavior("NavalDLC.Missions.MissionLogics.NavalShipsLogic") == null)
+            {
+                return;
+            }
+
+            Ship flagShip = ArmyCommander.FlagShipOrNull(party);
             Figurehead figurehead = flagShip?.Figurehead;
-            if (figurehead == null || AgentOnShip(agent, flagShip))
+            if (figurehead == null || ArmyCommander.AgentOnShip(agent, flagShip, bypassSteppedShipCheck: true))
             {
                 return;
             }
 
             ApplyFigureheadBonusesMethod.Invoke(__instance, new object[] { agent, agent.AgentDrivenProperties, figurehead });
         }
-
-        private static bool AgentOnShip(Agent agent, Ship ship)
-        {
-            object logic = ArmyCommander.MissionBehavior("NavalDLC.Missions.MissionLogics.NavalShipsLogic");
-            if (logic == null)
-            {
-                return false;
-            }
-
-            object allShips = Traverse.Create(logic).Property("AllShips").GetValue();
-            if (!(allShips is System.Collections.IEnumerable ships))
-            {
-                return false;
-            }
-
-            foreach (object missionShip in ships)
-            {
-                object origin = Traverse.Create(missionShip).Property("ShipOrigin").GetValue();
-                if (!ReferenceEquals(origin, ship))
-                {
-                    continue;
-                }
-
-                return Traverse.Create(missionShip).Method("GetIsAgentOnShip", agent, true).GetValue<bool>();
-            }
-
-            return false;
-        }
     }
 
     /// <summary>
     /// Commodore Lion figurehead morale when alone (Naval GetEffectiveInitialMorale only checks army leader).
+    /// Vanilla's per-ship loop already gave the Lion to agents standing on the flagship, so skip them.
     /// </summary>
     [HarmonyPatch]
     internal static class CommodoreAloneLionMoralePatch
@@ -306,11 +321,15 @@ namespace PerkFixesAndRebalance
                 return;
             }
 
-            Figurehead figurehead = party.FlagShip?.Figurehead;
-            if (figurehead != null && figurehead == DefaultFigureheads.Lion)
+            Ship flagShip = ArmyCommander.FlagShipOrNull(party);
+            Figurehead figurehead = flagShip?.Figurehead;
+            if (figurehead == null || figurehead != DefaultFigureheads.Lion
+                || ArmyCommander.AgentOnShip(agent, flagShip, bypassSteppedShipCheck: false))
             {
-                __result += figurehead.EffectAmount;
+                return;
             }
+
+            __result += figurehead.EffectAmount;
         }
     }
 }

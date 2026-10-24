@@ -1,6 +1,6 @@
 # Party leader perks
 
-147 perks. Bannerlord 1.4.8 + War Sails 1.2.8, with Perk Fixes and Rebalance (all settings at default). Effect text is what the game shows with Perk Fixes and Rebalance installed.
+151 perks. Bannerlord 1.4.8 + War Sails 1.2.8, with Perk Fixes and Rebalance (all settings at default). Effect text is what the game shows with Perk Fixes and Rebalance installed.
 
 A party leader effect applies to the party the hero leads. Companions leading clan parties use their own perks for their party. In an army, each party uses its own leader.
 
@@ -146,11 +146,12 @@ A party leader effect applies to the party the hero leads. Companions leading cl
 | 75 | **Small Unit Tactics** | +1 troop for the hideout crew | Horde Leader | Captain: +5% movement speed to troops on foot in your formation when it has 15 or fewer soldiers. |
 | 100 | **Coaching** | +3% damage when your troops are sent to confront the enemy. | Law Keeper | Captain: +1% damage by troops in your formation. |
 | 100 | **Law Keeper** | +10% damage against bandits when your troops are sent to confront the enemy. | Coaching | Captain: +4% damage against bandits by troops in your formation. |
-| 125 | **Improviser** | -25% loss of troops when breaking into or out of a settlement under siege. | Swift Regroup | Party member: No morale penalty for disorganized state in battles, in sally out or when being attacked. |
+| 125 | **Improviser** | -25% loss of troops when breaking into or out of a settlement under siege.<br>No morale penalty for disorganized state in battles, in sally out or when being attacked. | Swift Regroup |  |
 | 125 | **Swift Regroup** | -50% troops left behind when escaping from battles. | Improviser | Party member: -15% disorganized state duration when a raid or siege is broken. |
 | 200 | **Encirclement** | +5% damage to outnumbered enemies when troops are sent to confront the enemy. | Elite Reserves | Army leader: -10% influence cost to boost army cohesion. |
 | 200 | **Elite Reserves** | -20% less damage to tier 3+ units when troops are sent to confront the enemy. | Encirclement | Captain: -5% damage taken by troops in your formation. |
 | 225 | **Pre Battle Maneuvers** | +1% damage per 100 skill difference with the enemy when troops are sent to confront the enemy. | Besieged | Party member: +25% influence gain from winning battles. |
+| 225 | **Besieged** | +50% influence gain from winning sieges. | Pre Battle Maneuvers | Party member: +10% damage while besieged when troops are sent to confront the enemy. |
 | 250 | **Counter Offensive** | +10% damage when troops are sent to confront the attacking enemy in a field battle.<br>+10% damage when troops are sent to confront the enemy while outnumbered. | Gens d'armes |  |
 
 ### Roguery (13)
@@ -178,7 +179,7 @@ A party leader effect applies to the party the hero leads. Companions leading cl
 | Skill | Perk | Party leader effect | Alternative | Other effect of this perk |
 |---:|---|---|---|---|
 | 25 | **Self Promoter** | +1 morale while defending in a besieged settlement. | Virile | Personal: +3 renown when a tournament is won. |
-| 50 | **Warlord** | +1 relationship with a random lord of your kingdom when an enemy lord is defeated. | Oratory | Personal: +30% influence gain from battles. |
+| 50 | **Warlord** | +30% influence gain from battles.<br>+1 relationship with a random lord of your kingdom when an enemy lord is defeated. | Oratory |  |
 | 50 | **Oratory** | +1 relationship with a random notable of your kingdom when an enemy lord is defeated. | Warlord | Personal: +1 renown and influence for each issue resolved |
 | 125 | **Firebrand** | +1 recruitment slot from rural notables. | Flexible Ethics | Clan leader: -25% influence cost to initiate kingdom decisions. |
 | 225 | **Parade** | +5% daily chance to gain +1 relationship with a random lord in the same army. | Public Speaker | Personal: +5 loyalty bonus to settlement while waiting in the settlement. |
@@ -194,6 +195,7 @@ A party leader effect applies to the party the hero leads. Companions leading cl
 | 50 | **Fervent Attacker** | +4 starting battle morale when attacking.<br>+50% recruitment rate of tier 1, 2 and 3 prisoners. | Stout Defender |  |
 | 75 | **Authority** | +5 party size limit. | Heroic Leader | Governor: +20% security bonus from the town garrison in the governing settlement. |
 | 100 | **Loyalty and Honor** | Tier 3+ troops in your party no longer retreat due to low morale<br>+30% faster non-bandit prisoner recruitment. | Famous Commander |  |
+| 100 | **Famous Commander** | +50% renown gain from battles.<br>+200 experience to troops on recruitment. | Loyalty and Honor |  |
 | 125 | **Leader of the Masses** | +5% experience from battles shared with the troops in your party. | Presence | Clan leader: +5 party size for each town you control. |
 | 125 | **Presence** | No morale penalty for recruiting prisoners of your faction. | Leader of the Masses | Personal: +5 security per day while waiting in a town. |
 | 150 | **Citizen Militia** | +10% morale from victories. | Veteran's Respect | Governor: +20% rate of militias will spawn as veteran troops in the governed settlement. |
@@ -207,7 +209,7 @@ A party leader effect applies to the party the hero leads. Companions leading cl
 | 250 | **We Pledge our Swords** | +1 battle morale at the beginning of the battle for each tier 6 troop in the party up to 10 morale. | Talent Magnet | Personal: +1 companion limit. |
 | 275 | **Ultimate Leader** | +1 party size for each leadership point above 250. | - |  |
 
-### Trade (5)
+### Trade (7)
 
 | Skill | Perk | Party leader effect | Alternative | Other effect of this perk |
 |---:|---|---|---|---|
@@ -215,6 +217,8 @@ A party leader effect applies to the party the hero leads. Companions leading cl
 | 25 | **Appraiser** | -15% price penalty while selling equipment. | Whole Seller | Personal: Your profits are marked. |
 | 150 | **Content Trades** | -50% wages paid while waiting in settlements. | Mercenary Connections | Governor: +10% tariff income in the governed settlement. |
 | 150 | **Mercenary Connections** | -25% mercenary troop wages in your party. | Content Trades | Governor: +25% workshop production rate. |
+| 200 | **Granary Accountant** | -20% price penalty while selling food items. | Tradeyard Foreman | Governor: +20% production rate to grain, olives, fish, date in villages bound to the governed settlement. |
+| 200 | **Tradeyard Foreman** | -20% price penalty while selling pottery, tools, silk and jewelry. | Granary Accountant | Governor: +20% production rate to clay, iron, silk and silver in villages bound to the governed settlement. |
 | 275 | **Trickle Down** | +1 relationship with merchants if 10.000 or more denars are spent on a single deal. | Man of Means | Governor: +2 daily prosperity while building a project in the governed settlement. |
 
 ## Intelligence
