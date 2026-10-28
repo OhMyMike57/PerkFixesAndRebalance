@@ -71,7 +71,10 @@ namespace PerkFixesAndRebalance
     {
         private static void Postfix(Agent agent, SkillObject skill, ref int __result)
         {
-            if (!(agent?.Character is CharacterObject character))
+            // GetEffectiveSkill is a hot path. Bail on the cheap checks before touching the formation.
+            if (!PerkChanges.FlexibleFighterCavalry
+                || (skill != DefaultSkills.Bow && skill != DefaultSkills.Crossbow && skill != DefaultSkills.Throwing)
+                || !(agent?.Character is CharacterObject character) || !character.IsMounted || character.IsRanged)
             {
                 return;
             }

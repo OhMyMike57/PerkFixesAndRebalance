@@ -209,15 +209,30 @@ namespace PerkFixesAndRebalance
 
         internal static bool OverridesSurvival { get; private set; }
 
-        /// <summary>Prepare runs at mod load, before RBM may be loaded. Recheck when a troop actually goes down.</summary>
+        private static bool _resolved;
+
+        /// <summary>
+        /// Prepare runs at mod load, before RBM may be loaded, so look once more after all modules are up
+        /// (<see cref="Resolve"/> at game start). The lookup scans every loaded type (about 70 ms), so it must never
+        /// run per downed troop. Without RBM this is a plain bool read.
+        /// </summary>
         internal static bool RbmActive()
         {
+            if (!_resolved)
+            {
+                Resolve();
+            }
+
+            return OverridesSurvival;
+        }
+
+        internal static void Resolve()
+        {
+            _resolved = true;
             if (!OverridesSurvival)
             {
                 OverridesSurvival = Target != null;
             }
-
-            return OverridesSurvival;
         }
 
         private static MethodBase TargetMethod() => Target;

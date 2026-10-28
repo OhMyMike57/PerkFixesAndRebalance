@@ -21,6 +21,8 @@ namespace PerkFixesAndRebalance
         protected override void OnGameStart(Game game, IGameStarter gameStarterObject)
         {
             base.OnGameStart(game, gameStarterObject);
+            // One-time RBM lookup on the loading screen, not mid-battle.
+            DoctorsOathRbmSkillPatch.Resolve();
             if (game.GameType is Campaign && gameStarterObject is CampaignGameStarter campaignStarter)
             {
                 campaignStarter.AddBehavior(new PerkFixesAndRebalanceCampaignBehavior());

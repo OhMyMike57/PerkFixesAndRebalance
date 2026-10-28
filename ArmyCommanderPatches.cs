@@ -38,16 +38,30 @@ namespace PerkFixesAndRebalance
                 : null;
         }
 
+        // AccessTools.TypeByName scans every loaded type (tens of ms), and the reflection lookups below are per-agent
+        // hot paths during spawn, so resolve each thing once.
+        private static readonly Dictionary<string, MethodInfo> MissionBehaviorGetters = new Dictionary<string, MethodInfo>();
+        private static readonly Dictionary<Type, PropertyInfo> PropertyCache = new Dictionary<Type, PropertyInfo>();
+        private static readonly Dictionary<Type, PropertyInfo> ShipOriginCache = new Dictionary<Type, PropertyInfo>();
+        private static readonly Dictionary<Type, MethodInfo> IsAgentOnShipCache = new Dictionary<Type, MethodInfo>();
+        private static MethodInfo _openGetMissionBehavior;
+
         internal static object MissionBehavior(string typeName)
         {
-            Type type = AccessTools.TypeByName(typeName);
-            if (type == null || Mission.Current == null)
+            if (Mission.Current == null)
             {
                 return null;
             }
 
-            MethodInfo open = AccessTools.Method(typeof(Mission), "GetMissionBehavior", Type.EmptyTypes);
-            return open?.MakeGenericMethod(type).Invoke(Mission.Current, null);
+            if (!MissionBehaviorGetters.TryGetValue(typeName, out MethodInfo getter))
+            {
+                Type type = AccessTools.TypeByName(typeName);
+                _openGetMissionBehavior ??= AccessTools.Method(typeof(Mission), "GetMissionBehavior", Type.EmptyTypes);
+                getter = type == null ? null : _openGetMissionBehavior?.MakeGenericMethod(type);
+                MissionBehaviorGetters[typeName] = getter;
+            }
+
+            return getter?.Invoke(Mission.Current, null);
         }
 
         /// <summary>
@@ -66,21 +80,39 @@ namespace PerkFixesAndRebalance
                 return false;
             }
 
-            object allShips = Traverse.Create(logic).Property("AllShips").GetValue();
-            if (!(allShips is System.Collections.IEnumerable ships))
+            Type logicType = logic.GetType();
+            if (!PropertyCache.TryGetValue(logicType, out PropertyInfo allShipsProperty))
+            {
+                allShipsProperty = AccessTools.Property(logicType, "AllShips");
+                PropertyCache[logicType] = allShipsProperty;
+            }
+
+            if (!(allShipsProperty?.GetValue(logic, null) is System.Collections.IEnumerable ships))
             {
                 return false;
             }
 
             foreach (object missionShip in ships)
             {
-                object origin = Traverse.Create(missionShip).Property("ShipOrigin").GetValue();
-                if (!ReferenceEquals(origin, ship))
+                Type shipType = missionShip.GetType();
+                if (!ShipOriginCache.TryGetValue(shipType, out PropertyInfo originProperty))
+                {
+                    originProperty = AccessTools.Property(shipType, "ShipOrigin");
+                    ShipOriginCache[shipType] = originProperty;
+                }
+
+                if (!ReferenceEquals(originProperty?.GetValue(missionShip, null), ship))
                 {
                     continue;
                 }
 
-                return Traverse.Create(missionShip).Method("GetIsAgentOnShip", agent, bypassSteppedShipCheck).GetValue<bool>();
+                if (!IsAgentOnShipCache.TryGetValue(shipType, out MethodInfo onShip))
+                {
+                    onShip = AccessTools.Method(shipType, "GetIsAgentOnShip");
+                    IsAgentOnShipCache[shipType] = onShip;
+                }
+
+                return onShip != null && (bool)onShip.Invoke(missionShip, new object[] { agent, bypassSteppedShipCheck });
             }
 
             return false;
@@ -249,10 +281,14 @@ namespace PerkFixesAndRebalance
                 ? AccessTools.Method(t, "InitializeAgentStatsAfterDeploymentFinished", new[] { typeof(Agent) })
                 : null;
 
+        // Resolved once. The Postfix runs for every agent that spawns.
+        private static MethodInfo _applyFigureheadBonuses;
+
         private static MethodInfo ApplyFigureheadBonusesMethod =>
-            AccessTools.TypeByName("NavalDLC.GameComponents.NavalAgentStatCalculateModel") is Type t
-                ? AccessTools.Method(t, "ApplyFigureheadBonuses")
-                : null;
+            _applyFigureheadBonuses ??=
+                AccessTools.TypeByName("NavalDLC.GameComponents.NavalAgentStatCalculateModel") is Type t
+                    ? AccessTools.Method(t, "ApplyFigureheadBonuses")
+                    : null;
 
         private static bool Prepare() => Target != null && ApplyFigureheadBonusesMethod != null;
 
