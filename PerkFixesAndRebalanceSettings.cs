@@ -37,7 +37,9 @@ namespace PerkFixesAndRebalance
         private const string LoadNote = " Applies when you click Done, or when a game is loaded.";
 
         public override string Id => "PerkFixesAndRebalance";
-        public override string DisplayName => "{=PFx_Mcm_ModName}Perk Fixes and Rebalance";
+        // MCM shows DisplayName as-is (unlike setting and group names), so resolve the {=id} here.
+        public override string DisplayName =>
+            new TaleWorlds.Localization.TextObject("{=PFx_Mcm_ModName}Perk Fixes and Rebalance").ToString();
         public override string FolderName => "PerkFixesAndRebalance";
         public override string FormatType => "json2";
         public override char SubGroupDelimiter => '|';
